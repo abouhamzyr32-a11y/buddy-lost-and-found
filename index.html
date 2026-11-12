@@ -1,0 +1,925 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a5599">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Buddy — Lost & Found</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #20261f;
+      --muted: #74796f;
+      --paper: #f4f8fc;
+      --white: #fff;
+      --line: #dce8f2;
+      --green: #07539a;
+      --green-soft: #e4f2fc;
+      --lime: #d8edff;
+      --orange: #f1a36f;
+      --shadow: 0 14px 38px rgba(17, 65, 112, .10);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, #f2f8fd 0, #f7f9fc 260px, #f7f9fc 100%);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: -.015em;
+    }
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    .topbar {
+      height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1250px;
+      padding: 0 32px;
+      margin: auto;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 780; font-size: 19px; letter-spacing: -.06em; }
+    .brand-name small { display: block; color: #55728d; font-size: 9px; font-weight: 700; letter-spacing: .09em; margin-top: 2px; }
+    .brand-mark {
+      width: 35px; height: 35px; display: grid; place-items: center; border-radius: 12px;
+      background: #0a5599; color: white; font-size: 15px; font-weight: 800; border-radius: 10px 10px 15px 15px;
+    }
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+    .small-link, .staff-toggle {
+      border: 0; background: transparent; color: var(--ink); padding: 10px 13px; border-radius: 99px;
+      font-size: 13px; font-weight: 650;
+    }
+    .staff-toggle { background: var(--green); color: #fff; padding: 11px 17px; }
+    .staff-toggle:hover, .primary:hover { background: #385744; }
+    main { max-width: 1150px; padding: 0 28px 70px; margin: auto; }
+    .hero {
+      position: relative; overflow: hidden; margin: 22px auto 0; padding: 58px 7% 48px;
+      background: linear-gradient(135deg, #e4f3fd 0%, #dceefd 100%); border-radius: 24px; min-height: 330px;
+    }
+    .hero:after {
+      content: "✳"; position: absolute; right: 8%; top: 28px; color: #cae3f6;
+      font-size: 170px; line-height: 1; transform: rotate(-12deg); pointer-events: none;
+    }
+    .eyebrow { color: #1c6098; text-transform: uppercase; letter-spacing: .13em; font-size: 11px; font-weight: 780; }
+    h1 { font-family: Georgia, "Times New Roman", serif; letter-spacing: -.055em; line-height: .99; font-size: clamp(40px, 6vw, 67px); font-weight: 500; margin: 17px 0 15px; max-width: 640px; }
+    .hero-copy { color: #687265; font-size: 15px; line-height: 1.6; max-width: 485px; margin: 0; }
+    .search-wrap { position: relative; z-index: 1; margin: 28px 0 0; max-width: 690px; }
+    .search-box {
+      display: flex; align-items: center; gap: 12px; background: var(--white); padding: 8px 9px 8px 19px;
+      border: 1px solid rgba(43, 89, 128, .13); border-radius: 16px; box-shadow: 0 10px 25px rgba(52, 93, 128, .10);
+    }
+    .search-icon { color: #73796f; font-size: 20px; }
+    .search-box input { flex: 1; min-width: 0; border: 0; outline: 0; color: var(--ink); background: transparent; font-size: 14px; }
+    .search-box input::placeholder { color: #9a9e95; }
+    .primary { border: 0; background: var(--green); color: #fff; padding: 12px 19px; border-radius: 11px; font-weight: 700; font-size: 13px; transition: background .18s; }
+    .search-hint { font-size: 11px; color: #71796d; margin: 10px 0 0 3px; }
+    .results-section { padding-top: 42px; }
+    .section-head { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin-bottom: 18px; }
+    h2 { font-size: 23px; letter-spacing: -.04em; margin: 0; }
+    .section-note { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
+    .result-count { font-size: 12px; color: var(--muted); }
+    .results-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 17px; }
+    .item-card { overflow: hidden; background: var(--white); border: 1px solid var(--line); border-radius: 17px; transition: transform .18s, box-shadow .18s; }
+    .item-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+    .item-image { height: 218px; position: relative; display: grid; place-items: center; overflow: hidden; background: #efeee8; }
+    .item-image img { width: 100%; height: 100%; object-fit: cover; }
+    .image-emoji { display: grid; place-items: center; width: 142px; height: 142px; border-radius: 50%; font-size: 76px; background: rgba(255,255,255,.62); box-shadow: inset 0 0 0 1px rgba(0,0,0,.025); }
+    .item-tag { position: absolute; top: 12px; left: 12px; background: rgba(255,255,255,.9); color: #4d614f; border-radius: 99px; padding: 7px 10px; font-size: 10px; font-weight: 750; }
+    .item-body { padding: 17px 17px 16px; }
+    .item-body h3 { margin: 0; font-size: 16px; letter-spacing: -.035em; }
+    .item-description { margin: 7px 0 13px; color: var(--muted); font-size: 12px; line-height: 1.5; min-height: 36px; }
+    .card-footer { border-top: 1px solid #f0f0ea; padding-top: 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .date-label { font-size: 11px; color: #8a8e84; }
+    .claim-link { border: 0; padding: 0; background: transparent; color: #395b43; font-size: 12px; font-weight: 750; }
+    .empty-state { display: none; text-align: center; padding: 47px 20px; background: white; border: 1px solid var(--line); border-radius: 17px; }
+    .empty-state .empty-icon { font-size: 34px; }
+    .empty-state h3 { margin: 9px 0 5px; font-size: 18px; }
+    .empty-state p { color: var(--muted); font-size: 13px; margin: 0 auto; max-width: 390px; line-height: 1.55; }
+    .privacy-note { display: flex; gap: 12px; margin: 30px 0 0; padding: 16px 18px; background: #eaf4fc; border-radius: 14px; color: #5e7180; font-size: 11px; line-height: 1.55; }
+    .privacy-note strong { color: #4b5849; }
+    footer { max-width: 1150px; margin: auto; padding: 0 28px 28px; color: #989b92; font-size: 11px; display: flex; justify-content: space-between; }
+    .staff-page { display: none; padding-top: 35px; }
+    .staff-heading { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 24px; }
+    .staff-heading h1 { font-size: 42px; margin: 8px 0 0; }
+    .back-button { border: 1px solid var(--line); background: #fff; padding: 10px 15px; border-radius: 11px; color: var(--ink); font-size: 12px; font-weight: 700; }
+    .staff-tabs { display: flex; gap: 7px; padding: 5px; width: max-content; max-width: 100%; background: #edeee8; border-radius: 12px; margin-bottom: 22px; }
+    .tab-button { border: 0; color: #73796e; padding: 10px 15px; border-radius: 9px; background: transparent; font-size: 12px; font-weight: 700; }
+    .tab-button.active { color: var(--ink); background: #fff; box-shadow: 0 2px 6px rgba(20,30,20,.06); }
+    .staff-layout { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr); gap: 20px; align-items: start; }
+    .panel { background: #fff; border: 1px solid var(--line); border-radius: 17px; padding: 22px; }
+    .panel h2 { font-size: 18px; }
+    .panel-intro { color: var(--muted); font-size: 12px; line-height: 1.5; margin: 7px 0 19px; }
+    .field { margin: 0 0 14px; }
+    .field label { display: block; margin-bottom: 7px; font-size: 11px; font-weight: 750; color: #495147; }
+    .field input, .field textarea, .field select {
+      width: 100%; border: 1px solid #e5e7df; border-radius: 10px; background: #fcfcfa;
+      outline: 0; padding: 11px 12px; color: var(--ink); font-size: 12px;
+    }
+    .field input:focus, .field textarea:focus, .field select:focus { border-color: #91a895; box-shadow: 0 0 0 3px #eaf0e8; }
+    .field textarea { resize: vertical; min-height: 72px; }
+    .two-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .upload-box { display: block; border: 1px dashed #bbc5b8; border-radius: 12px; text-align: center; padding: 18px 13px; background: #fafbf8; color: #677465; cursor: pointer; }
+    .upload-box:hover { background: #f3f6ef; }
+    .upload-box b { display: block; margin: 4px 0; font-size: 12px; color: #3b4c3d; }
+    .upload-box span { font-size: 10px; }
+    .upload-box input { display: none; }
+    .photo-previews { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    .photo-previews img { width: 65px; height: 65px; object-fit: cover; border-radius: 8px; }
+    .private-hint { font-size: 10px; color: #8a8f85; margin: -5px 0 14px; }
+    .form-message { min-height: 17px; margin: 8px 0 0; color: #a34c37; font-size: 11px; }
+    .staff-submit { width: 100%; }
+    .inventory-panel { margin-top: 20px; }
+    .inventory-list { margin-top: 14px; }
+    .inventory-row { display: flex; align-items: center; gap: 12px; border-top: 1px solid #f0f0ea; padding: 12px 0; }
+    .inventory-thumb { width: 45px; height: 45px; flex: 0 0 auto; display: grid; place-items: center; background: #f0f0e9; border-radius: 9px; overflow: hidden; font-size: 24px; }
+    .inventory-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .inventory-meta { min-width: 0; flex: 1; }
+    .inventory-meta b { font-size: 12px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .inventory-meta span { display: block; margin-top: 4px; color: #858a80; font-size: 10px; }
+    .status-select { border: 1px solid var(--line); border-radius: 8px; padding: 7px 5px; font-size: 10px; max-width: 118px; background: white; }
+    .inquiry-row { padding: 14px 0; border-top: 1px solid #f0f0ea; }
+    .inquiry-row b { font-size: 12px; }
+    .inquiry-row p { margin: 5px 0; font-size: 11px; color: #697066; line-height: 1.5; }
+    .inquiry-row span { font-size: 10px; color: #92968e; }
+    .toast { position: fixed; bottom: 22px; left: 50%; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; background: #263e32; color: white; padding: 12px 17px; border-radius: 10px; box-shadow: var(--shadow); font-size: 12px; transition: .2s; z-index: 10; }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .mobile-nav { display: none; }
+    .login-backdrop { display: none; position: fixed; inset: 0; z-index: 15; background: rgba(10, 35, 61, .52); padding: 20px; align-items: center; justify-content: center; }
+    .login-backdrop.open { display: flex; }
+    .login-card { width: min(420px, 100%); background: white; padding: 28px; border-radius: 20px; box-shadow: 0 24px 70px rgba(0,0,0,.2); }
+    .login-card h2 { font-size: 24px; margin: 11px 0 7px; }
+    .login-card p { color: #667789; font-size: 13px; line-height: 1.55; margin: 0 0 20px; }
+    .login-mark { display: grid; place-items: center; width: 42px; height: 42px; color: white; font-weight: 800; background: #0a5599; border-radius: 12px 12px 17px 17px; }
+    .login-error { min-height: 18px; color: #b33e35 !important; font-size: 11px !important; margin: 9px 0 0 !important; }
+    .staff-session { color: #54718a; font-size: 11px; padding: 8px 0 0; }
+    .upload-box { border-color: #96bfdf; background: #f5faff; }
+    .tab-button.active { color: #074f91; }
+    .panel { border-color: #deebf5; }
+    .back-button { border-color: #d7e6f2; }
+    .field input:focus, .field textarea:focus, .field select:focus { border-color: #67a4d3; box-shadow: 0 0 0 3px #e6f3fc; }
+    .claim-link { color: #07539a; }
+    .item-tag { color: #07539a; }
+    .empty-state { border-color: #deebf5; }
+    .staff-page { padding-top: 25px; }
+    .staff-tabs { background: #e6f2fb; }
+    .small-link { color: #315b7d; }
+    .modal-backdrop { display: none; position: fixed; inset: 0; padding: 20px; background: rgba(24,31,25,.48); z-index: 5; align-items: center; justify-content: center; }
+    .modal-backdrop.open { display: flex; }
+    .modal { width: min(440px, 100%); background: white; border-radius: 18px; padding: 24px; box-shadow: 0 24px 70px rgba(0,0,0,.18); }
+    .modal-top { display: flex; justify-content: space-between; align-items: start; }
+    .modal h2 { font-size: 21px; }
+    .modal-close { border: 0; background: #f1f2ec; border-radius: 50%; height: 30px; width: 30px; font-size: 17px; }
+    .modal-copy { font-size: 12px; color: var(--muted); line-height: 1.5; margin: 9px 0 18px; }
+    :root {
+      --ink: #103c70;
+      --muted: #587493;
+      --paper: #f2f8fd;
+      --line: #d7e8f6;
+      --green: #0a5599;
+      --green-soft: #e2f2ff;
+      --lime: #d8edff;
+      --accent-red: #d92f3b;
+      --accent-red-hover: #bd2430;
+      --shadow: 0 14px 38px rgba(17, 65, 112, .10);
+    }
+    body { background: linear-gradient(180deg, #f3f9ff 0, #f8fbff 300px, #f8fbff 100%); }
+    .brand-mark { background: #0a5599; }
+    .brand-name small { color: #557a9b; }
+    .hero { background: linear-gradient(135deg, #eaf5ff 0%, #dceeff 100%); }
+    .hero:after { color: #c9e2f8; }
+    .eyebrow { color: #1762a1; }
+    h1 { font-family: inherit; font-weight: 760; letter-spacing: -.06em; }
+    .hero-copy { color: #587493; }
+    .primary { background: #0a5599; }
+    .primary:hover, .staff-toggle:hover { background: #08477f; }
+    #searchForm .primary, #resultsSearchForm .primary { background: var(--accent-red); }
+    #searchForm .primary:hover, #resultsSearchForm .primary:hover { background: var(--accent-red-hover); }
+    #searchForm .primary:focus-visible, #resultsSearchForm .primary:focus-visible {
+      outline: 3px solid rgba(217, 47, 59, .25); outline-offset: 2px;
+    }
+    .search-hint { color: #64809c; }
+    .item-card { border-color: #dbeaf6; }
+    .item-tag, .claim-link { color: #07539a; }
+    .privacy-note { background: #e7f3fd; color: #526e89; }
+    .privacy-note strong { color: #123f70; }
+    .buddy-card {
+      display: flex; align-items: flex-start; gap: 13px; margin-top: 20px; padding: 15px 17px;
+      border-radius: 15px; background: #dcedfb; color: #164a7e;
+    }
+    .buddy-card-icon { display: grid; flex: 0 0 34px; width: 34px; height: 34px; place-items: center; border-radius: 11px; background: #fff; color: #0b5598; font-size: 18px; }
+    .buddy-card h2 { font-size: 15px; margin: 0 0 4px; letter-spacing: -.03em; }
+    .buddy-card p { margin: 0; font-size: 12px; line-height: 1.45; color: #39658f; }
+    .quick-links { margin-top: 21px; }
+    .quick-links > h2 { margin: 0 0 12px; font-size: 16px; }
+    .quick-link-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .quick-link-grid button {
+      min-height: 82px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 7px;
+      border: 1px solid #e0edf8; border-radius: 13px; background: #fff; color: #174e82; font-size: 11px; font-weight: 680;
+    }
+    .quick-link-grid button:hover { background: #f2f8fe; border-color: #b6d6f0; }
+    .quick-link-grid button span { font-size: 21px; line-height: 1; }
+    .how-it-works { padding: 12px 14px; margin: 10px 0 0; border-radius: 12px; background: #fff; color: #52718d; font-size: 12px; line-height: 1.55; }
+    .search-results-page { padding-top: 24px; }
+    .search-results-page[hidden] { display: none; }
+    .results-page-heading { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+    .results-back {
+      display: grid; flex: 0 0 40px; width: 40px; height: 40px; place-items: center;
+      border: 1px solid var(--line); border-radius: 13px; background: #fff; color: var(--ink); font-size: 22px;
+    }
+    .results-page-heading h1 { font-size: 23px; margin: 0; line-height: 1.1; }
+    .results-page-heading p { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+    .results-search { margin: 0 0 22px; }
+    .results-search .search-box { min-height: 54px; }
+    .buddy-results-banner { display: flex; gap: 12px; margin: 0 0 18px; padding: 14px; border-radius: 14px; background: #dcedfb; color: #174e82; }
+    .buddy-results-banner > span { display: grid; flex: 0 0 36px; width: 36px; height: 36px; place-items: center; border-radius: 11px; background: #fff0f1; color: var(--accent-red); }
+    .buddy-results-banner strong { display: block; font-size: 13px; }
+    .buddy-results-banner p { margin: 4px 0 0; color: #527392; font-size: 11px; line-height: 1.45; }
+    @media (max-width: 780px) {
+      .results-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .staff-layout { grid-template-columns: 1fr; }
+      .hero { padding: 45px 6% 38px; }
+      .hero:after { right: -15px; top: 18px; font-size: 125px; opacity: .6; }
+    }
+    @media (max-width: 520px) {
+      body { background: #f4f9fe; }
+      .topbar {
+        position: sticky; top: 0; z-index: 3; height: 62px; padding: 0 16px;
+        background: rgba(255,255,255,.97); border-bottom: 1px solid #e3eef8;
+      }
+      .brand { gap: 9px; font-size: 18px; }
+      .brand-mark { width: 34px; height: 36px; border-radius: 10px 10px 15px 15px; }
+      .small-link { display: none; }
+      .staff-toggle { display: none; }
+      main { width: 100%; padding: 0 14px calc(88px + env(safe-area-inset-bottom)); }
+      .hero { margin-top: 0; min-height: 0; border-radius: 0 0 20px 20px; padding: 24px 16px 19px; }
+      .eyebrow { font-size: 9px; }
+      h1 { font-size: 36px; max-width: 350px; margin: 12px 0 10px; line-height: 1.02; }
+      .hero-copy { font-size: 13px; max-width: 340px; line-height: 1.5; }
+      .hero:after { right: -15px; top: 8px; font-size: 105px; opacity: .48; }
+      .search-wrap { margin-top: 18px; }
+      .search-box { display: grid; grid-template-columns: 22px 1fr; padding: 12px 12px; gap: 6px; border-radius: 14px; }
+      .search-box input { min-height: 35px; font-size: 14px; }
+      .search-box .primary { grid-column: 1 / -1; width: 100%; min-height: 46px; padding: 11px 12px; }
+      .search-hint { line-height: 1.45; }
+      .buddy-card { margin-top: 16px; padding: 13px; }
+      .quick-links { margin-top: 19px; }
+      .quick-links > h2 { font-size: 15px; margin-bottom: 10px; }
+      .quick-link-grid { gap: 8px; }
+      .quick-link-grid button { min-height: 76px; padding: 8px 3px; font-size: 10px; }
+      .results-section { padding-top: 24px; }
+      .search-results-page { padding-top: 18px; }
+      .results-page-heading { margin-bottom: 17px; }
+      .results-page-heading h1 { font-size: 21px; }
+      .results-search { margin-bottom: 18px; }
+      .results-search .search-box { display: flex; padding: 8px 10px 8px 14px; min-height: 50px; }
+      .results-search .search-box input { min-height: 30px; }
+      .results-search .search-box .primary { flex: 0 0 auto; width: auto; min-height: 38px; padding: 9px 13px; }
+      .buddy-results-banner { margin-bottom: 16px; }
+      .results-grid { grid-template-columns: 1fr; gap: 10px; }
+      .item-card { display: grid; grid-template-columns: 104px minmax(0, 1fr); border-radius: 14px; }
+      .item-image { height: 100%; min-height: 126px; }
+      .image-emoji { width: 76px; height: 76px; font-size: 42px; }
+      .item-tag { top: 8px; left: 7px; font-size: 8px; padding: 6px 7px; }
+      .item-body { padding: 12px 11px; }
+      .item-body h3 { font-size: 14px; }
+      .item-description { min-height: 0; margin: 6px 0 9px; font-size: 11px; }
+      .card-footer { padding-top: 9px; }
+      .section-head { align-items: start; }
+      .section-head h2 { font-size: 20px; }
+      .result-count { padding-top: 5px; }
+      .staff-page { padding-top: 18px; }
+      .staff-heading { align-items: flex-start; margin-bottom: 16px; }
+      .staff-heading h1 { font-size: 32px; }
+      .staff-heading .eyebrow { font-size: 9px; }
+      .back-button { padding: 9px 10px; font-size: 11px; }
+      .staff-tabs { display: none; }
+      .panel { padding: 16px; border-radius: 15px; }
+      .two-fields { gap: 8px; }
+      .field input, .field textarea, .field select { min-height: 44px; font-size: 16px; }
+      .field textarea { min-height: 82px; }
+      .upload-box { min-height: 118px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+      .primary, .back-button, .tab-button, .claim-link { min-height: 42px; }
+      footer { display: none; }
+      .mobile-nav {
+        display: flex; position: fixed; z-index: 4; bottom: 0; left: 0; right: 0;
+        height: calc(66px + env(safe-area-inset-bottom)); padding: 5px 8px calc(5px + env(safe-area-inset-bottom));
+        background: rgba(255,255,255,.97); border-top: 1px solid #dce8f2; justify-content: space-around;
+        box-shadow: 0 -5px 18px rgba(12,50,84,.07); backdrop-filter: blur(14px);
+      }
+      .mobile-nav button { flex: 1; border: 0; background: transparent; color: #6b8198; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 3px; font-size: 10px; font-weight: 650; }
+      .mobile-nav button span { display: grid; place-items: center; min-width: 26px; min-height: 24px; font-size: 20px; line-height: 1; }
+      .mobile-nav button.active { color: #07539a; }
+      .mobile-nav button.active span { font-weight: 800; }
+      .mobile-nav.staff-nav button { font-size: 9px; }
+      .inventory-row { gap: 8px; }
+      .status-select { width: 105px; min-height: 40px; }
+      .login-card { padding: 23px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">A</span><span class="brand-name">Buddy<small>AISJ · LOST &amp; FOUND</small></span></div>
+    <div class="top-actions">
+      <button class="small-link" id="homeLink">Lost &amp; found</button>
+      <button class="staff-toggle" id="staffToggle">Staff login <span aria-hidden="true">↗</span></button>
+    </div>
+  </header>
+
+  <main>
+    <section id="searchPage">
+      <div class="hero">
+        <div class="eyebrow">American International School of Jeddah</div>
+        <h1>Hi! Find what<br>you’ve lost.</h1>
+        <p class="hero-copy">Search for your lost item or browse recent things found on campus. Tell Buddy what you remember.</p>
+        <form class="search-wrap" id="searchForm">
+          <div class="search-box">
+            <span class="search-icon" aria-hidden="true">⌕</span>
+            <input id="searchInput" type="search" autocomplete="off" placeholder="e.g. pink and purple water bottle with a unicorn" aria-label="Describe the item you lost">
+            <button class="primary" type="submit">Search with Buddy <span aria-hidden="true">→</span></button>
+          </div>
+          <p class="search-hint">Try an item type, color, pattern, brand, or anything else you remember.</p>
+        </form>
+        <div class="buddy-card">
+          <span class="buddy-card-icon" aria-hidden="true">★</span>
+          <div><h2>Meet Buddy</h2><p>Tell Buddy what you remember and get help finding a possible match.</p></div>
+        </div>
+        <div class="quick-links">
+          <h2>Quick links</h2>
+          <div class="quick-link-grid">
+            <button type="button" data-home-action="browse"><span aria-hidden="true">▦</span>Browse items</button>
+            <button type="button" data-home-action="how" aria-expanded="false" aria-controls="howItWorks"><span aria-hidden="true">ⓘ</span>How it works</button>
+            <button type="button" data-home-action="staff"><span aria-hidden="true">＋</span>Staff sign in</button>
+          </div>
+          <p class="how-it-works" id="howItWorks" hidden>Describe your item, check Buddy’s likely matches, then ask staff for help. Staff will verify ownership before returning anything.</p>
+        </div>
+      </div>
+
+      <section class="results-section" aria-live="polite">
+        <div class="section-head">
+          <div>
+            <h2 id="resultsTitle">Recently found</h2>
+            <p class="section-note" id="resultsNote">A few things that have made their way to us.</p>
+          </div>
+          <span class="result-count" id="resultCount"></span>
+        </div>
+        <div class="results-grid" id="resultsGrid"></div>
+        <div class="empty-state" id="emptyState">
+          <div class="empty-icon">🔎</div>
+          <h3>No close matches just yet</h3>
+          <p>Try a different word or add a detail like the color, shape, or pattern. New things are added as they’re turned in.</p>
+        </div>
+      </section>
+
+      <div class="privacy-note" id="privacyNote"><span aria-hidden="true">✳</span><div><strong>A possible match is just a starting point.</strong> Buddy can help spot items that sound similar, but staff will verify ownership before anything is returned.</div></div>
+    </section>
+
+    <section class="search-results-page" id="searchResultsPage" aria-live="polite" hidden>
+      <div class="results-page-heading">
+        <button class="results-back" id="resultsBack" type="button" aria-label="Back to home">‹</button>
+        <div><h1>Search Results</h1><p>Possible matches from found items</p></div>
+      </div>
+      <form class="results-search" id="resultsSearchForm">
+        <div class="search-box">
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <input id="resultsSearchInput" type="search" autocomplete="off" placeholder="Describe the item you lost" aria-label="Update your item search">
+          <button class="primary" type="submit">Search</button>
+        </div>
+      </form>
+      <div class="buddy-results-banner">
+        <span aria-hidden="true">★</span>
+        <div><strong id="buddyResultsTitle">Buddy found some matches!</strong><p id="buddyResultsNote">Here are the closest results based on your description.</p></div>
+      </div>
+      <section class="results-section">
+        <div class="section-head">
+          <div><h2 id="searchResultsTitle">Possible matches</h2><p class="section-note" id="searchResultsNote"></p></div>
+          <span class="result-count" id="searchResultCount"></span>
+        </div>
+        <div class="results-grid" id="searchResultsGrid"></div>
+        <div class="empty-state" id="searchEmptyState">
+          <div class="empty-icon">🔎</div>
+          <h3>No close matches just yet</h3>
+          <p>Try a different word or add a detail like the color, shape, or pattern. New things are added as they’re turned in.</p>
+        </div>
+      </section>
+      <div class="privacy-note"><span aria-hidden="true">✳</span><div><strong>A possible match is just a starting point.</strong> Staff will verify ownership before anything is returned.</div></div>
+    </section>
+
+    <section class="staff-page" id="staffPage">
+      <div class="staff-heading">
+        <div><div class="eyebrow">AISJ · STAFF WORKSPACE</div><h1>Found items</h1><div class="staff-session" id="staffSession"></div></div>
+        <button class="back-button" id="staffLogout">Log out</button>
+      </div>
+      <div class="staff-tabs" role="tablist">
+        <button class="tab-button active" data-tab="intake" role="tab">Add an item</button>
+        <button class="tab-button" data-tab="inventory" role="tab">Inventory</button>
+        <button class="tab-button" data-tab="inquiries" role="tab">Inquiries <span id="inquiryBadge"></span></button>
+      </div>
+      <div id="intakeTab" class="staff-tab-panel">
+        <div class="staff-layout">
+          <form class="panel" id="intakeForm">
+            <h2>Log a found item</h2>
+            <p class="panel-intro">A good photo and a few details help Buddy make a better match. Items need at least one photo to appear in search.</p>
+            <div class="field"><label for="itemName">What is it? *</label><input id="itemName" required maxlength="70" placeholder="e.g. Water bottle"></div>
+            <div class="two-fields">
+              <div class="field"><label for="itemCategory">Category</label><select id="itemCategory"><option>Accessories</option><option>Clothing</option><option>Electronics</option><option>Bags</option><option>Drinkware</option><option>Other</option></select></div>
+              <div class="field"><label for="itemColor">Main color</label><input id="itemColor" maxlength="40" placeholder="e.g. Pink and purple"></div>
+            </div>
+            <div class="field"><label for="itemDescription">Describe it *</label><textarea id="itemDescription" required maxlength="300" placeholder="Pattern, brand, distinguishing details..."></textarea></div>
+            <div class="field"><label for="itemPhotos">Photos * <span style="font-weight:400;color:#888">· at least one required</span></label>
+              <label class="upload-box" for="itemPhotos"><span style="font-size:22px">＋</span><b>Add item or tag photos</b><span>JPG, PNG, or WebP · up to 3 photos</span><input id="itemPhotos" type="file" accept="image/*" multiple></label>
+              <div class="photo-previews" id="photoPreviews"></div>
+            </div>
+            <div class="private-hint">Tip: for jackets and other hard-to-identify items, include a tag or detail photo.</div>
+            <div class="two-fields">
+              <div class="field"><label for="itemDate">Date found</label><input id="itemDate" type="date"></div>
+              <div class="field"><label for="staffLocation">Storage location <span style="font-weight:400;color:#888">· staff only</span></label><input id="staffLocation" maxlength="80" placeholder="e.g. Main office, drawer 2"></div>
+            </div>
+            <div class="field"><label for="staffNotes">Private staff notes <span style="font-weight:400;color:#888">· not shown in search</span></label><textarea id="staffNotes" maxlength="300" placeholder="Details for staff only"></textarea></div>
+            <button class="primary staff-submit" type="submit">Add to found items <span aria-hidden="true">→</span></button>
+            <p class="form-message" id="formMessage" role="alert"></p>
+          </form>
+          <aside class="panel">
+            <h2>Quick photo tips</h2>
+            <p class="panel-intro">Help someone recognize their things at a glance.</p>
+            <div style="display:grid;gap:14px;font-size:12px;color:#626a60;line-height:1.5">
+              <div><b style="color:#303a30">01 &nbsp; Show the whole item</b><br>Take a clear photo in good light.</div>
+              <div><b style="color:#303a30">02 &nbsp; Add a close-up</b><br>Capture a brand, tag, or unique detail when it helps.</div>
+              <div><b style="color:#303a30">03 &nbsp; Keep private details private</b><br>Don’t include people or personal information in photos.</div>
+            </div>
+            <div style="margin-top:22px;padding:14px;background:#f4f5ef;border-radius:12px;color:#667061;font-size:11px;line-height:1.55"><b style="color:#3c4c3c">Prototype note</b><br>This test version saves items only in this browser. Search uses the text and details entered by staff; image understanding is not connected yet.</div>
+          </aside>
+        </div>
+      </div>
+      <div id="inventoryTab" class="staff-tab-panel" hidden>
+        <div class="panel inventory-panel"><h2>Found items</h2><p class="panel-intro">Update the status as items are returned. Only available items show up in search.</p><div class="inventory-list" id="inventoryList"></div></div>
+      </div>
+      <div id="inquiriesTab" class="staff-tab-panel" hidden>
+        <div class="panel"><h2>Claim inquiries</h2><p class="panel-intro">People who found a possible match can leave a note for your team.</p><div id="inquiryList"></div></div>
+      </div>
+    </section>
+  </main>
+  <footer><span>Buddy Lost &amp; Found</span><span>Prototype · Items stay in this browser</span></footer>
+
+  <div class="modal-backdrop" id="claimModal" role="dialog" aria-modal="true" aria-labelledby="claimTitle">
+    <form class="modal" id="claimForm">
+      <div class="modal-top"><h2 id="claimTitle">Ask about this item</h2><button class="modal-close" type="button" id="closeModal" aria-label="Close">×</button></div>
+      <p class="modal-copy" id="claimItemName">A possible match is a good start. Tell staff how to reach you and they’ll help verify it.</p>
+      <div class="field"><label for="claimName">Your name *</label><input id="claimName" required maxlength="80" autocomplete="name" placeholder="Name"></div>
+      <div class="field"><label for="claimContact">Email or phone *</label><input id="claimContact" required maxlength="120" placeholder="How staff can reach you"></div>
+      <div class="field"><label for="pickupDate">When will you pick it up? *</label><input id="pickupDate" type="date" required></div>
+      <button class="primary staff-submit" type="submit">Send inquiry</button>
+      <p class="form-message" id="claimMessageStatus" role="alert"></p>
+    </form>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+  <div class="login-backdrop" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+    <form class="login-card" id="loginForm">
+      <div class="login-mark">A</div>
+      <h2 id="loginTitle">Staff sign in</h2>
+      <p>Use your AISJ staff email to open the staff workspace and manage found items.</p>
+      <div class="field"><label for="staffEmail">Staff email</label><input id="staffEmail" type="email" required autocomplete="email" placeholder="name@aisj.edu.sa"></div>
+      <button class="primary staff-submit" type="submit">Continue to staff workspace →</button>
+      <p class="login-error" id="loginError" role="alert"></p>
+      <p style="font-size:10px;margin:4px 0 0;color:#8695a2">Prototype sign-in checks the email domain only. It is not secure authentication.</p>
+    </form>
+  </div>
+  <nav class="mobile-nav" id="mobileNav" aria-label="Main navigation">
+    <button class="active" data-nav="home"><span>⌂</span>Home</button>
+    <button data-nav="search"><span>⌕</span>Search</button>
+    <button data-nav="browse"><span>▦</span>Found</button>
+    <button data-nav="login"><span>♙</span>Staff</button>
+  </nav>
+
+  <script>
+    (() => {
+      const STORAGE_KEY = "buddy-lost-found-v1";
+      const STAFF_SESSION_KEY = "buddy-staff-email";
+      const STAFF_EMAIL_DOMAIN = "@aisj.edu.sa";
+      const demoItems = [
+        { id: "demo-bottle", name: "Patterned water bottle", category: "Drinkware", color: "Pink and purple", description: "Pink and purple water bottle with a unicorn pattern and a silver lid.", emoji: "🧴", bg: "#e8dff0", date: "2026-10-24", status: "available", photos: [], location: "Front desk", notes: "", demo: true },
+        { id: "demo-jacket", name: "Denim jacket", category: "Clothing", color: "Blue", description: "Blue denim jacket with brass buttons and a red plaid lining. Brand tag inside collar.", emoji: "🧥", bg: "#dce8e9", date: "2026-10-22", status: "available", photos: [], location: "Office closet", notes: "Tag says size M", demo: true },
+        { id: "demo-bag", name: "Canvas backpack", category: "Bags", color: "Forest green", description: "Forest green canvas backpack with a small orange patch and two front pockets.", emoji: "🎒", bg: "#e4eadc", date: "2026-10-21", status: "available", photos: [], location: "Front desk", notes: "", demo: true },
+        { id: "demo-keys", name: "Key ring", category: "Accessories", color: "Silver and blue", description: "Three silver keys on a blue fabric keychain with a tiny star charm.", emoji: "🔑", bg: "#f0e8d9", date: "2026-10-20", status: "available", photos: [], location: "Front desk", notes: "", demo: true },
+        { id: "demo-headphones", name: "Wireless headphones", category: "Electronics", color: "White", description: "White over-ear wireless headphones with a soft padded headband.", emoji: "🎧", bg: "#ebe8df", date: "2026-10-18", status: "available", photos: [], location: "Office closet", notes: "", demo: true },
+        { id: "demo-scarf", name: "Striped knitted scarf", category: "Clothing", color: "Orange and cream", description: "Soft knitted scarf with wide orange and cream stripes.", emoji: "🧣", bg: "#f2e4d9", date: "2026-10-17", status: "available", photos: [], location: "Front desk", notes: "", demo: true }
+      ];
+      const $ = (selector) => document.querySelector(selector);
+      let state = loadState();
+      let selectedPhotos = [];
+      let selectedItemId = null;
+
+      function loadState() {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          return saved ? JSON.parse(saved) : { items: demoItems, inquiries: [] };
+        } catch (error) {
+          console.error("Could not load Buddy data from this browser.", error);
+          return { items: demoItems, inquiries: [] };
+        }
+      }
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          return true;
+        } catch (error) {
+          console.error("Could not save Buddy data in this browser.", error);
+          showToast("Could not save. Try fewer or smaller photos.");
+          return false;
+        }
+      }
+      function escapeHtml(value) {
+        return String(value || "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+      }
+      function formatDate(value) {
+        if (!value) return "Recently found";
+        const date = new Date(value + "T12:00:00");
+        return Number.isNaN(date.getTime()) ? "Recently found" : date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+      }
+      function todayInputDate() {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        return now.toISOString().slice(0, 10);
+      }
+      function showToast(message) {
+        const toast = $("#toast");
+        toast.textContent = message;
+        toast.classList.add("show");
+        window.setTimeout(() => toast.classList.remove("show"), 2600);
+      }
+      function renderImage(item, className) {
+        if (item.photos && item.photos.length) return `<img class="${className}" src="${item.photos[0]}" alt="${escapeHtml(item.name)}">`;
+        return `<div class="image-emoji" style="background:${escapeHtml(item.bg || "#eceee6")}">${escapeHtml(item.emoji || "📦")}</div>`;
+      }
+      function tokenize(text) {
+        const synonyms = {
+          bottle: ["drinkware", "flask", "tumbler"], flask: ["bottle"], coat: ["jacket", "clothing"], coat: ["jacket", "clothing"],
+          jacket: ["coat", "clothing"], hoodie: ["sweatshirt", "clothing"], purse: ["bag"], rucksack: ["backpack", "bag"],
+          spectacles: ["glasses"], sneakers: ["shoes"], trainers: ["shoes"], cellphone: ["phone", "electronics"],
+          purple: ["violet", "lavender"], violet: ["purple"], red: ["crimson"], green: ["forest"], pink: ["rose"],
+          striped: ["stripes"], stripes: ["striped"], spotted: ["dots"], speckled: ["dots"], fuzzy: ["soft"]
+        };
+        const words = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").match(/[a-z0-9]+/g) || [];
+        const expanded = [];
+        words.forEach((word) => {
+          const normalized = word.endsWith("s") && word.length > 3 ? word.slice(0, -1) : word;
+          if (normalized.length > 1 && !["with", "the", "and", "for", "that", "this", "was", "are", "its", "item", "lost", "found", "have", "had", "from", "about", "something"].includes(normalized)) {
+            expanded.push(normalized);
+            (synonyms[normalized] || []).forEach((synonym) => expanded.push(synonym));
+          }
+        });
+        return [...new Set(expanded)];
+      }
+      function scoreItem(query, item) {
+        const queryWords = tokenize(query);
+        const itemText = `${item.name} ${item.category} ${item.color} ${item.description}`.toLowerCase();
+        if (!queryWords.length) return 0;
+        let score = 0;
+        queryWords.forEach((word) => {
+          if (itemText.includes(word)) {
+            score += item.name.toLowerCase().includes(word) ? 3 : item.color.toLowerCase().includes(word) ? 2.5 : 1.5;
+          }
+        });
+        const core = (query.toLowerCase().match(/[a-z0-9]+/g) || []).filter((word) => word.length > 2);
+        if (core.length > 2 && queryWords.length && score / queryWords.length < 0.28) return 0;
+        return score / Math.sqrt(queryWords.length);
+      }
+      function renderItemCards(grid, items) {
+        grid.innerHTML = items.map((item) => `
+          <article class="item-card">
+            <div class="item-image">${renderImage(item, "")}<span class="item-tag">${escapeHtml(item.category || "Found item")}</span></div>
+            <div class="item-body">
+              <h3>${escapeHtml(item.name)}</h3>
+              <p class="item-description">${escapeHtml(item.description || item.color || "A found item.")}</p>
+              <div class="card-footer"><span class="date-label">Found ${escapeHtml(formatDate(item.date))}</span><button class="claim-link" data-claim="${escapeHtml(item.id)}">Ask about it →</button></div>
+            </div>
+          </article>`).join("");
+      }
+      function renderResults() {
+        const grid = $("#resultsGrid");
+        const results = state.items.filter((item) => item.status === "available")
+          .sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+        $("#resultCount").textContent = `${results.length} ${results.length === 1 ? "item" : "items"}`;
+        $("#emptyState").style.display = results.length ? "none" : "block";
+        grid.style.display = results.length ? "grid" : "none";
+        renderItemCards(grid, results);
+      }
+      function renderSearchResults(query) {
+        const grid = $("#searchResultsGrid");
+        let results = state.items.filter((item) => item.status === "available");
+        if (query.trim()) {
+          results = results.map((item) => ({ item, score: scoreItem(query, item) }))
+            .filter((entry) => entry.score > 0)
+            .sort((a, b) => b.score - a.score)
+            .map((entry) => entry.item);
+        } else {
+          results.sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+        }
+        const hasResults = results.length > 0;
+        $("#searchResultsTitle").textContent = query.trim() ? "Buddy’s suggestions" : "Recently found";
+        $("#searchResultsNote").textContent = hasResults
+          ? "These items share details with your description. Take a look."
+          : "Try another detail — a color, shape, or pattern can help.";
+        $("#searchResultCount").textContent = `${results.length} ${results.length === 1 ? "item" : "items"}`;
+        $("#buddyResultsTitle").textContent = hasResults ? `Buddy found ${results.length} ${results.length === 1 ? "match" : "matches"}!` : "Buddy couldn’t find a close match yet";
+        $("#buddyResultsNote").textContent = hasResults
+          ? "Here are the closest results based on your description."
+          : "Try a different detail or check again later.";
+        $("#searchEmptyState").style.display = hasResults ? "none" : "block";
+        grid.style.display = hasResults ? "grid" : "none";
+        renderItemCards(grid, results);
+      }
+      function renderInventory() {
+        const list = $("#inventoryList");
+        const items = [...state.items].sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+        list.innerHTML = items.length ? items.map((item) => `
+          <div class="inventory-row">
+            <div class="inventory-thumb">${item.photos && item.photos.length ? `<img src="${item.photos[0]}" alt="">` : escapeHtml(item.emoji || "📦")}</div>
+            <div class="inventory-meta"><b>${escapeHtml(item.name)}</b><span>${escapeHtml(item.category || "Other")} · ${escapeHtml(formatDate(item.date))}${item.location ? ` · ${escapeHtml(item.location)}` : ""}</span></div>
+            <select class="status-select" data-status="${escapeHtml(item.id)}" aria-label="Status for ${escapeHtml(item.name)}">
+              <option value="available" ${item.status === "available" ? "selected" : ""}>Available</option>
+              <option value="returned" ${item.status === "returned" ? "selected" : ""}>Returned</option>
+              <option value="removed" ${item.status === "removed" ? "selected" : ""}>Removed</option>
+            </select>
+          </div>`).join("") : `<p class="panel-intro">No items have been added yet.</p>`;
+      }
+      function renderInquiries() {
+        const box = $("#inquiryList");
+        $("#inquiryBadge").textContent = state.inquiries.length ? `(${state.inquiries.length})` : "";
+        box.innerHTML = state.inquiries.length ? [...state.inquiries].reverse().map((inquiry) => {
+          const item = state.items.find((entry) => entry.id === inquiry.itemId);
+          const pickupDate = inquiry.pickupDate ? new Date(`${inquiry.pickupDate}T12:00:00`).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : "";
+          return `<div class="inquiry-row"><b>${escapeHtml(inquiry.name)} · ${escapeHtml(item ? item.name : "Item no longer in inventory")}</b><p>${escapeHtml(inquiry.contact)}${pickupDate ? `<br>Pickup date: ${escapeHtml(pickupDate)}` : ""}</p><span>${escapeHtml(new Date(inquiry.createdAt).toLocaleString())}</span></div>`;
+        }).join("") : `<p class="panel-intro">No inquiries yet. When someone asks about an item, their message will show up here.</p>`;
+      }
+      function renderAll() {
+        renderResults();
+        if (!$("#searchResultsPage").hidden) renderSearchResults($("#resultsSearchInput").value);
+        renderInventory();
+        renderInquiries();
+      }
+      function openLogin() {
+        $("#loginError").textContent = "";
+        $("#loginModal").classList.add("open");
+        $("#staffEmail").focus();
+      }
+      function closeLogin() { $("#loginModal").classList.remove("open"); }
+      function renderPublicNav() {
+        $("#mobileNav").classList.remove("staff-nav");
+        $("#mobileNav").innerHTML = `
+          <button class="active" data-nav="home"><span aria-hidden="true">⌂</span>Home</button>
+          <button data-nav="search"><span aria-hidden="true">⌕</span>Search</button>
+          <button data-nav="browse"><span aria-hidden="true">▦</span>Found</button>
+          <button data-nav="login"><span aria-hidden="true">♙</span>Staff</button>`;
+      }
+      function renderStaffNav() {
+        $("#mobileNav").classList.add("staff-nav");
+        $("#mobileNav").innerHTML = `
+          <button data-nav="intake"><span>＋</span>Add item</button>
+          <button data-nav="inventory"><span>▣</span>My items</button>
+          <button data-nav="inquiries"><span>✉</span>Inquiries</button>
+          <button data-nav="logout"><span>↪</span>Log out</button>`;
+      }
+      function setActivePublicNav(navName) {
+        $("#mobileNav").querySelectorAll("[data-nav]").forEach((button) => {
+          button.classList.toggle("active", button.dataset.nav === navName);
+        });
+      }
+      function showHomePage() {
+        $("#searchPage").style.display = "block";
+        $("#searchResultsPage").hidden = true;
+        $("#staffPage").style.display = "none";
+        renderPublicNav();
+        window.scrollTo(0, 0);
+      }
+      function showSearchResults(query) {
+        $("#resultsSearchInput").value = query;
+        renderSearchResults(query);
+        $("#searchPage").style.display = "none";
+        $("#searchResultsPage").hidden = false;
+        $("#staffPage").style.display = "none";
+        renderPublicNav();
+        setActivePublicNav("search");
+        window.scrollTo(0, 0);
+      }
+      function openStaff(tab) {
+        if (!sessionStorage.getItem(STAFF_SESSION_KEY)) { openLogin(); return; }
+        $("#searchPage").style.display = "none";
+        $("#searchResultsPage").hidden = true;
+        $("#staffPage").style.display = "block";
+        renderStaffNav();
+        $("#staffSession").textContent = sessionStorage.getItem(STAFF_SESSION_KEY);
+        $("#staffToggle").textContent = "Staff workspace";
+        selectTab(tab || "intake");
+        window.scrollTo(0, 0);
+      }
+      function closeStaff() {
+        if (sessionStorage.getItem(STAFF_SESSION_KEY)) { openStaff("intake"); return; }
+        showHomePage();
+        $("#staffToggle").innerHTML = 'Staff login <span aria-hidden="true">↗</span>';
+      }
+      function logoutStaff() {
+        sessionStorage.removeItem(STAFF_SESSION_KEY);
+        showHomePage();
+        $("#staffToggle").innerHTML = 'Staff login <span aria-hidden="true">↗</span>';
+        closeLogin();
+      }
+      function selectTab(tab) {
+        document.querySelectorAll(".tab-button").forEach((button) => button.classList.toggle("active", button.dataset.tab === tab));
+        document.querySelectorAll(".staff-tab-panel").forEach((panel) => { panel.hidden = panel.id !== `${tab}Tab`; });
+      }
+      function resizeImage(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onerror = () => reject(new Error("Could not read that image."));
+          reader.onload = () => {
+            const image = new Image();
+            image.onerror = () => reject(new Error("That image could not be opened."));
+            image.onload = () => {
+              const scale = Math.min(1, 1000 / Math.max(image.width, image.height));
+              const canvas = document.createElement("canvas");
+              canvas.width = Math.max(1, Math.round(image.width * scale));
+              canvas.height = Math.max(1, Math.round(image.height * scale));
+              canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+              resolve(canvas.toDataURL("image/jpeg", .76));
+            };
+            image.src = reader.result;
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+      $("#searchForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        showSearchResults($("#searchInput").value.trim());
+      });
+      $("#resultsSearchForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        showSearchResults($("#resultsSearchInput").value.trim());
+      });
+      $("#resultsBack").addEventListener("click", showHomePage);
+      $("#staffToggle").addEventListener("click", () => sessionStorage.getItem(STAFF_SESSION_KEY) ? openStaff("intake") : openLogin());
+      $("#staffLogout").addEventListener("click", logoutStaff);
+      $("#homeLink").addEventListener("click", () => sessionStorage.getItem(STAFF_SESSION_KEY) ? openStaff("intake") : showHomePage());
+      $("#loginForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const email = $("#staffEmail").value.trim().toLowerCase();
+        if (!email.endsWith(STAFF_EMAIL_DOMAIN) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          $("#loginError").textContent = `Use a valid staff email ending in ${STAFF_EMAIL_DOMAIN}.`;
+          return;
+        }
+        sessionStorage.setItem(STAFF_SESSION_KEY, email);
+        $("#loginForm").reset();
+        closeLogin();
+        openStaff("intake");
+      });
+      $("#loginModal").addEventListener("click", (event) => { if (event.target === $("#loginModal")) closeLogin(); });
+      $("#mobileNav").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-nav]");
+        if (!button) return;
+        if (button.dataset.nav === "intake" || button.dataset.nav === "inventory" || button.dataset.nav === "inquiries") {
+          selectTab(button.dataset.nav);
+          return;
+        }
+        if (button.dataset.nav === "logout") { logoutStaff(); return; }
+        if (button.dataset.nav === "login") {
+          if (sessionStorage.getItem(STAFF_SESSION_KEY)) openStaff("intake");
+          else openLogin();
+        }
+        if (button.dataset.nav === "home" || button.dataset.nav === "search" || button.dataset.nav === "browse") {
+          if (sessionStorage.getItem(STAFF_SESSION_KEY)) return;
+          if (button.dataset.nav === "home") {
+            showHomePage();
+            return;
+          }
+          if (button.dataset.nav === "search" && !$("#searchResultsPage").hidden) {
+            setActivePublicNav("search");
+            $("#resultsSearchInput").focus({ preventScroll: true });
+            return;
+          }
+          showHomePage();
+          setActivePublicNav(button.dataset.nav);
+          if (button.dataset.nav === "search") {
+            $("#searchForm").scrollIntoView({ behavior: "smooth", block: "center" });
+            $("#searchInput").focus({ preventScroll: true });
+          } else {
+            $(".results-section").scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }
+      });
+      document.querySelectorAll("[data-home-action]").forEach((button) => button.addEventListener("click", () => {
+        if (button.dataset.homeAction === "browse") {
+          $(".results-section").scrollIntoView({ behavior: "smooth", block: "start" });
+          return;
+        }
+        if (button.dataset.homeAction === "how") {
+          const instructions = $("#howItWorks");
+          instructions.hidden = !instructions.hidden;
+          button.setAttribute("aria-expanded", String(!instructions.hidden));
+          return;
+        }
+        if (sessionStorage.getItem(STAFF_SESSION_KEY)) openStaff("intake");
+        else openLogin();
+      }));
+      document.querySelectorAll(".tab-button").forEach((button) => button.addEventListener("click", () => selectTab(button.dataset.tab)));
+      $("#itemPhotos").addEventListener("change", async (event) => {
+        const files = [...event.target.files].slice(0, 3);
+        $("#formMessage").textContent = "";
+        if (event.target.files.length > 3) $("#formMessage").textContent = "Only the first three photos were selected.";
+        try {
+          selectedPhotos = await Promise.all(files.map(resizeImage));
+          $("#photoPreviews").innerHTML = selectedPhotos.map((photo) => `<img src="${photo}" alt="Photo preview">`).join("");
+        } catch (error) {
+          selectedPhotos = [];
+          $("#photoPreviews").innerHTML = "";
+          $("#formMessage").textContent = error.message;
+        }
+      });
+      $("#intakeForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const message = $("#formMessage");
+        if (!selectedPhotos.length) { message.textContent = "Add at least one item photo before saving."; return; }
+        const item = {
+          id: `item-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          name: $("#itemName").value.trim(),
+          category: $("#itemCategory").value,
+          color: $("#itemColor").value.trim(),
+          description: $("#itemDescription").value.trim(),
+          photos: selectedPhotos,
+          date: $("#itemDate").value || new Date().toISOString().slice(0, 10),
+          location: $("#staffLocation").value.trim(),
+          notes: $("#staffNotes").value.trim(),
+          status: "available"
+        };
+        if (!item.name || !item.description) { message.textContent = "Add an item name and description."; return; }
+        state.items.push(item);
+        if (!saveState()) { state.items.pop(); return; }
+        event.target.reset();
+        selectedPhotos = [];
+        $("#photoPreviews").innerHTML = "";
+        $("#itemDate").value = new Date().toISOString().slice(0, 10);
+        message.textContent = "";
+        renderAll();
+        showToast("Item added — it’s now searchable.");
+        selectTab("inventory");
+      });
+      $("#inventoryList").addEventListener("change", (event) => {
+        const id = event.target.dataset.status;
+        if (!id) return;
+        const item = state.items.find((entry) => entry.id === id);
+        if (!item) return;
+        const previous = item.status;
+        item.status = event.target.value;
+        if (!saveState()) item.status = previous;
+        renderAll();
+        showToast(item.status === "available" ? "Item is visible in search." : "Item hidden from search.");
+      });
+      [$("#resultsGrid"), $("#searchResultsGrid")].forEach((grid) => grid.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-claim]");
+        if (!button) return;
+        selectedItemId = button.dataset.claim;
+        const item = state.items.find((entry) => entry.id === selectedItemId);
+        if (!item) return;
+        $("#claimItemName").textContent = `You’re asking about “${item.name}.” Staff will follow up to help verify it.`;
+        $("#pickupDate").min = todayInputDate();
+        $("#pickupDate").value = "";
+        $("#claimModal").classList.add("open");
+        $("#claimName").focus();
+      }));
+      function closeModal() { $("#claimModal").classList.remove("open"); }
+      $("#closeModal").addEventListener("click", closeModal);
+      $("#pickupDate").addEventListener("input", () => $("#pickupDate").setCustomValidity(""));
+      $("#claimModal").addEventListener("click", (event) => { if (event.target === $("#claimModal")) closeModal(); });
+      document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeModal(); });
+      $("#claimForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const pickupDate = $("#pickupDate").value;
+        if (!pickupDate || pickupDate < todayInputDate()) {
+          $("#pickupDate").setCustomValidity("Choose today or a future pickup date.");
+          $("#pickupDate").reportValidity();
+          return;
+        }
+        $("#pickupDate").setCustomValidity("");
+        const inquiry = {
+          id: `inquiry-${Date.now()}`,
+          itemId: selectedItemId,
+          name: $("#claimName").value.trim(),
+          contact: $("#claimContact").value.trim(),
+          pickupDate,
+          createdAt: new Date().toISOString()
+        };
+        state.inquiries.push(inquiry);
+        if (!saveState()) { state.inquiries.pop(); return; }
+        event.target.reset();
+        closeModal();
+        renderInquiries();
+        showToast("Inquiry sent to the staff desk.");
+      });
+      $("#itemDate").value = new Date().toISOString().slice(0, 10);
+      renderAll();
+      if (sessionStorage.getItem(STAFF_SESSION_KEY)) openStaff("intake");
+    })();
+  </script>
+</body>
+</html>
